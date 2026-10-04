@@ -1,0 +1,37 @@
+# Keep the build context small and, more importantly, keep secrets and local
+# state out of the image. Everything here is rebuilt from source inside the
+# image, so nothing needs to be copied in.
+
+# Never bake these in.
+.env
+.env.*
+!.env.example
+!.env.docker.example
+
+# Local database state. PGlite's data dir is ~40 MB of Postgres files and would
+# both bloat the context and shadow whatever DATABASE_URL the container gets.
+data/
+**/data/
+.pgdata/
+
+# Reinstalled by `npm ci` in the image.
+node_modules/
+**/node_modules/
+
+# Rebuilt inside the image. Host dist/ files are also the wrong platform.
+dist/
+**/dist/
+
+# Source control and CI noise.
+.git/
+.gitignore
+.github/
+
+# Logs, coverage, editor state.
+*.log
+coverage/
+**/coverage/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

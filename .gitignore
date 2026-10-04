@@ -1,0 +1,29 @@
+node_modules/
+dist/
+.env
+.env.local
+# Any other env file (e.g. .env.docker) may hold real secrets. The two
+# committed templates are re-included explicitly.
+.env.*
+!.env.example
+!.env.docker.example
+*.log
+.DS_Store
+data/
+coverage/
+.pgdata/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Fitted models are build artifacts, never committed. train.py regenerates them
+# from a routine-traversal sample; the sample itself may contain case data and
+# must stay out of the repo too.
+services/risk-service/models/
+*.joblib
+*.pkl
+services/risk-service/samples/

@@ -1,0 +1,191 @@
+# CryptoTrace AI — API + SPA in one container, Postgres in another.
+#
+#   docker compose up -d --build
+#   docker compose exec app node server/dist/db/seed.js     # first run only
+#
+# The app container deliberately uses the `pg` driver, not the embedded PGlite:
+# PGlite stores a Postgres data directory on local disk, which a container loses
+# on every rebuild. Setting DATABASE_URL is what switches drivers
+# (see server/src/db/index.ts), so a non-empty value here is what makes the
+# data durable.
+#
+# Ports are published on 127.0.0.1 only. Put a TLS-terminating reverse proxy in
+# front (nginx, Caddy, or a cloud load balancer) before exposing this to anyone
+# else — the app speaks plain HTTP and holds case data.
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: cryptotrace-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cryptotrace
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cryptotrace}
+      POSTGRES_DB: cryptotrace
+    # Loopback only. Nothing outside this machine should reach the database.
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # The app waits on this before starting, so a cold Postgres that is still
+      # initialising does not crash-loop the API.
+      test: ["CMD-SHELL", "pg_isready -U cryptotrace -d cryptotrace"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cryptotrace-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      # Inside the container the app must bind all interfaces to be reachable
+      # from the host port mapping. The host binding stays loopback-only.
+      HOST: 0.0.0.0
+      PORT: "8080"
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+
+      # Fail fast rather than boot with a weak secret. The `:?` form makes
+      # compose abort if the variable is missing or empty, giving the same
+      # guarantee config.ts gives at runtime — a bad secret is caught before
+      # the image even starts.
+      # Generate with:
+      #   node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+      # Quoted in YAML because the message contains a colon-space.
+      JWT_SECRET: '${JWT_SECRET:?JWT_SECRET is required. Copy .env.docker.example to .env.docker and set it.}'
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-7}
+
+      DATABASE_URL: postgres://cryptotrace:${POSTGRES_PASSWORD:-cryptotrace}@db:5432/cryptotrace
+      PGPOOL_MAX: ${PGPOOL_MAX:-10}
+
+      # All optional. Blank values fall back to keyless public endpoints.
+      MEMPOOL_API: ${MEMPOOL_API:-https://mempool.space/api}
+      ETH_RPC_URL: ${ETH_RPC_URL:-https://cloudflare-eth.com}
+      ETHERSCAN_API_KEY: ${ETHERSCAN_API_KEY:-}
+      TRONGRID_API: ${TRONGRID_API:-https://api.trongrid.io}
+      TRONGRID_API_KEY: ${TRONGRID_API_KEY:-}
+      POLYGONSCAN_API_KEY: ${POLYGONSCAN_API_KEY:-}
+
+      # Seeded admin credentials. Read once by the seed script; the value here
+      # is not used at runtime after that.
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@cryptotrace.local}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+
+      # Advisory ML service. Unset by default: with no trained model the
+      # advisory is null, so there is nothing to point at. Set
+      # RISK_SERVICE_URL=http://risk:8099 in .env.docker once a model exists.
+      RISK_SERVICE_URL: ${RISK_SERVICE_URL:-}
+      RISK_SERVICE_TIMEOUT_MS: ${RISK_SERVICE_TIMEOUT_MS:-1500}
+
+      # AI model provider. Empty key keeps the assistant panel disabled
+      # (aiAvailable=false in config.ts): document extraction and grounded Q&A
+      # do not run at all. Set the key in .env.docker to enable them.
+      # OPENAI_BASE_URL points the OpenAI client at any compatible gateway
+      # (OpenRouter, a local proxy); leave it empty for OpenAI itself.
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+      AI_ENABLED: ${AI_ENABLED:-true}
+    ports:
+      # ${CRYPTOTRACE_PORT:-8080} lets you run the containerised app alongside
+      # a local `start-server.ps1` instance by overriding just this value.
+      #
+      # Loopback-bound, so it is never reachable from outside the host even
+      # when the `tls` profile is running. That makes it a convenient direct
+      # port for health checks and `curl` on the box itself.
+      - "127.0.0.1:${CRYPTOTRACE_PORT:-8080}:8080"
+    volumes:
+      # Runtime writes (uploads, and the embedded DB if DATABASE_URL is ever
+      # cleared) live in /app/data, created and chowned to `node` in the
+      # Dockerfile. A named volume keeps them across rebuilds.
+      - appdata:/app/data
+
+  # ---------------------------------------------------------------------------
+  # Advisory risk service. Opt-in via RISK_SERVICE_URL, and harmless when
+  # unused: with no model mounted it serves ready=false/score=null, which the
+  # app treats exactly like "service disabled".
+  #
+  # No published port. It is reachable only on the internal compose network,
+  # because it is a private helper rather than something to expose.
+  # ---------------------------------------------------------------------------
+  risk:
+    build:
+      context: ./services/risk-service
+      dockerfile: Dockerfile
+    container_name: cryptotrace-risk
+    restart: unless-stopped
+    environment:
+      MODEL_PATH: /app/models/risk.joblib
+      # Percentile cut points for the score bands. Defaults put ~3% of ordinary
+      # traffic in the top band; raise the last value for a shorter queue.
+      RISK_BAND_EDGES: ${RISK_BAND_EDGES:-50,75,90,97}
+      RISK_BAND_LABELS: ${RISK_BAND_LABELS:-Typical,Above typical,Unusual,Rare,Very rare}
+    volumes:
+      # Mount a trained model here to enable scoring. The directory is created
+      # empty by the image, so an unconfigured deployment starts unready
+      # instead of failing to boot.
+      - risk_models:/app/models
+
+  # ---------------------------------------------------------------------------
+  # TLS termination. Opt-in via the `tls` profile, so a plain `docker compose
+  # up` never publishes anything beyond loopback by accident:
+  #
+  #   docker compose --env-file .env.docker --profile tls up -d --build
+  #
+  # This is the only service meant to face the internet. It owns CSP and HSTS
+  # (the app disables helmet's CSP because the static host is expected to set
+  # it) and forwards to `app:8080` on the internal network.
+  # ---------------------------------------------------------------------------
+  proxy:
+    image: caddy:2-alpine
+    container_name: cryptotrace-proxy
+    restart: unless-stopped
+    profiles: ["tls"]
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      # The hostname this host answers to, and a real address it resolves to.
+      # Let's Encrypt validates this over the public internet, so it cannot be
+      # localhost.
+      DOMAIN: ${DOMAIN:?set DOMAIN to the public hostname, e.g. cryptotrace.example.com}
+      # Expiry notices. Setting this to the literal value "internal" makes Caddy
+      # use its own local CA instead of Let's Encrypt, which is how the staging
+      # check in the README verifies TLS without a public domain.
+      ACME_EMAIL: ${ACME_EMAIL:-admin@example.com}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Caddy writes its ACME account, certificates, and internal CA here.
+      # Persist it or every restart re-issues certificates and hits rate limits.
+      - caddy_data:/data
+      - caddy_config:/config
+    ports:
+      # ACME HTTP-01 needs 80 reachable, and 443 for the traffic itself.
+      # ${PROXY_BIND:-0.0.0.0} is deliberately 0.0.0.0 — this is the public
+      # entry point. Set it to 127.0.0.1 when a cloud load balancer already
+      # terminates TLS in front of this host.
+      - "${PROXY_BIND:-0.0.0.0}:80:80"
+      - "${PROXY_BIND:-0.0.0.0}:443:443"
+    healthcheck:
+      # Caddy's own admin endpoint on localhost inside the container.
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:2019/config/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  pgdata:
+  appdata:
+  caddy_data:
+  caddy_config:
+  risk_models:

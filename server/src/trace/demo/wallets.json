@@ -1,0 +1,290 @@
+{
+  "W001": {
+    "tag": 101,
+    "role": "victim",
+    "kind": "address",
+    "label": "Victim Wallet",
+    "chain": "ethereum",
+    "riskLevel": "Low",
+    "riskScore": 5,
+    "riskIndicators": []
+  },
+  "W002": {
+    "tag": 102,
+    "role": "scam",
+    "kind": "address",
+    "label": "Scam Wallet (Wallet A)",
+    "chain": "ethereum",
+    "riskLevel": "High",
+    "riskScore": 78,
+    "riskIndicators": [
+      "Previously observed scam interaction",
+      "Rapid fund movement: funds left within 3 minutes of arrival"
+    ]
+  },
+  "W003": {
+    "tag": 103,
+    "role": "intermediate",
+    "kind": "address",
+    "label": "Intermediate Wallet A (Wallet B)",
+    "chain": "ethereum",
+    "riskLevel": "High",
+    "riskScore": 64,
+    "riskIndicators": [
+      "Rapid fund movement",
+      "Co-mingled with unrelated inbound transfers"
+    ]
+  },
+  "W004": {
+    "tag": 104,
+    "role": "intermediate",
+    "kind": "address",
+    "label": "Intermediate Wallet B (Wallet D)",
+    "chain": "ethereum",
+    "riskLevel": "Medium",
+    "riskScore": 52,
+    "riskIndicators": ["Multiple incoming wallets"]
+  },
+  "W005": {
+    "tag": 105,
+    "role": "intermediate",
+    "kind": "address",
+    "label": "Intermediate Wallet C (Wallet C)",
+    "chain": "ethereum",
+    "riskLevel": "High",
+    "riskScore": 87,
+    "riskIndicators": [
+      "Previously observed scam interaction",
+      "Rapid fund movement",
+      "High-risk service exposure",
+      "Multiple incoming wallets"
+    ]
+  },
+  "W006": {
+    "tag": 106,
+    "role": "exchange_deposit",
+    "kind": "exchange",
+    "label": "Simulated Exchange Deposit Address",
+    "chain": "ethereum",
+    "entity": "E001",
+    "riskLevel": "High",
+    "riskScore": 74,
+    "riskIndicators": [
+      "High-risk service exposure",
+      "Deposit address, not a personal wallet"
+    ]
+  },
+  "W007": {
+    "tag": 107,
+    "role": "secondary",
+    "kind": "address",
+    "label": "Secondary Wallet",
+    "chain": "ethereum",
+    "riskLevel": "Medium",
+    "riskScore": 41,
+    "riskIndicators": ["Newly active wallet"]
+  },
+  "W008": {
+    "tag": 108,
+    "role": "unknown",
+    "kind": "address",
+    "label": "Unknown Destination",
+    "chain": "ethereum",
+    "riskLevel": "Unrated",
+    "riskScore": 0,
+    "riskIndicators": []
+  },
+  "W009": {
+    "tag": 109,
+    "role": "unconfirmed_counterparty",
+    "kind": "address",
+    "label": "Unconfirmed Counterparty",
+    "chain": "ethereum",
+    "riskLevel": "Unrated",
+    "riskScore": 0,
+    "riskIndicators": []
+  },
+  "W010": {
+    "tag": 110,
+    "role": "fee_sink",
+    "kind": "address",
+    "label": "Network Fee (validator)",
+    "chain": "ethereum",
+    "riskLevel": "Unrated",
+    "riskScore": 0,
+    "riskIndicators": []
+  },
+
+  "W020": {
+    "tag": 201,
+    "role": "victim",
+    "kind": "address",
+    "label": "Victim Wallet",
+    "chain": "ethereum",
+    "riskLevel": "Low",
+    "riskScore": 4,
+    "riskIndicators": []
+  },
+  "W021": {
+    "tag": 202,
+    "role": "scam",
+    "kind": "address",
+    "label": "Scam Wallet",
+    "chain": "ethereum",
+    "riskLevel": "High",
+    "riskScore": 80,
+    "riskIndicators": ["Previously observed scam interaction"]
+  },
+  "W022": {
+    "tag": 203,
+    "role": "exchange_deposit",
+    "kind": "exchange",
+    "label": "Simulated Exchange Deposit Address",
+    "chain": "ethereum",
+    "entity": "E001",
+    "riskLevel": "High",
+    "riskScore": 74,
+    "riskIndicators": ["High-risk service exposure"]
+  },
+  "W023": {
+    "tag": 204,
+    "role": "fee_sink",
+    "kind": "address",
+    "label": "Network Fee (validator)",
+    "chain": "ethereum",
+    "riskLevel": "Unrated",
+    "riskScore": 0,
+    "riskIndicators": []
+  },
+
+  "W030": {
+    "tag": 301,
+    "role": "victim",
+    "kind": "address",
+    "label": "Victim Wallet",
+    "chain": "ethereum",
+    "riskLevel": "Low",
+    "riskScore": 4,
+    "riskIndicators": []
+  },
+  "W031": {
+    "tag": 302,
+    "role": "scam",
+    "kind": "address",
+    "label": "Scam Wallet",
+    "chain": "ethereum",
+    "riskLevel": "High",
+    "riskScore": 76,
+    "riskIndicators": ["Previously observed scam interaction"]
+  },
+  "W032": {
+    "tag": 303,
+    "role": "intermediate",
+    "kind": "address",
+    "label": "Intermediate Wallet A",
+    "chain": "ethereum",
+    "riskLevel": "Medium",
+    "riskScore": 46,
+    "riskIndicators": []
+  },
+  "W033": {
+    "tag": 304,
+    "role": "intermediate",
+    "kind": "address",
+    "label": "Intermediate Wallet B",
+    "chain": "ethereum",
+    "riskLevel": "Medium",
+    "riskScore": 44,
+    "riskIndicators": []
+  },
+  "W034": {
+    "tag": 305,
+    "role": "intermediate",
+    "kind": "address",
+    "label": "Intermediate Wallet C",
+    "chain": "ethereum",
+    "riskLevel": "Medium",
+    "riskScore": 49,
+    "riskIndicators": []
+  },
+  "W035": {
+    "tag": 306,
+    "role": "exchange_deposit",
+    "kind": "exchange",
+    "label": "Simulated Exchange Deposit Address",
+    "chain": "ethereum",
+    "entity": "E001",
+    "riskLevel": "High",
+    "riskScore": 74,
+    "riskIndicators": ["High-risk service exposure"]
+  },
+
+  "W040": {
+    "tag": 401,
+    "role": "victim",
+    "kind": "address",
+    "label": "Victim Wallet (Ethereum)",
+    "chain": "ethereum",
+    "riskLevel": "Low",
+    "riskScore": 6,
+    "riskIndicators": []
+  },
+  "W041": {
+    "tag": 402,
+    "role": "bridge",
+    "kind": "bridge",
+    "label": "Simulated Bridge Contract (Ethereum)",
+    "chain": "ethereum",
+    "entity": "E002",
+    "riskLevel": "Medium",
+    "riskScore": 48,
+    "riskIndicators": ["Cross-ledger movement breaks the chain of custody"]
+  },
+  "W042": {
+    "tag": 403,
+    "role": "secondary",
+    "kind": "address",
+    "label": "Bitcoin Destination Wallet",
+    "chain": "bitcoin",
+    "riskLevel": "Medium",
+    "riskScore": 38,
+    "riskIndicators": ["Receives from a cross-ledger source"]
+  },
+  "W043": {
+    "tag": 404,
+    "role": "exchange_deposit",
+    "kind": "exchange",
+    "label": "Simulated Exchange (Bitcoin)",
+    "chain": "bitcoin",
+    "riskLevel": "High",
+    "riskScore": 72,
+    "riskIndicators": ["High-risk service exposure"]
+  },
+
+  "X001": { "tag": 501, "role": "scam", "kind": "address", "label": "Suspect wallet (origin)", "chain": "ethereum", "riskLevel": "High", "riskScore": 72 },
+  "X002": { "tag": 502, "role": "intermediate", "kind": "address", "label": "Intermediary A", "chain": "ethereum", "riskLevel": "Medium", "riskScore": 44 },
+  "X003": { "tag": 503, "role": "intermediate", "kind": "address", "label": "Intermediary B", "chain": "ethereum", "riskLevel": "Low", "riskScore": 21 },
+  "X004": { "tag": 504, "role": "unknown", "kind": "address", "label": "Destination wallet", "chain": "ethereum", "riskLevel": "Unrated", "riskScore": 0 },
+
+  "X010": { "tag": 601, "role": "scam", "kind": "address", "label": "Suspect wallet (origin)", "chain": "ethereum", "riskLevel": "High", "riskScore": 81 },
+  "X011": { "tag": 602, "role": "co_mingled", "kind": "address", "label": "Co-mingled wallet", "chain": "ethereum", "riskLevel": "High", "riskScore": 68 },
+  "X012": { "tag": 603, "role": "unknown", "kind": "address", "label": "Branch 1 destination", "chain": "ethereum", "riskLevel": "Unrated", "riskScore": 0 },
+  "X013": { "tag": 604, "role": "unknown", "kind": "address", "label": "Branch 2 destination", "chain": "ethereum", "riskLevel": "Unrated", "riskScore": 0 },
+  "X014": { "tag": 605, "role": "exchange_deposit", "kind": "exchange", "label": "Exchange deposit", "chain": "ethereum", "riskLevel": "Medium", "riskScore": 35 },
+
+  "X020": { "tag": 701, "role": "scam", "kind": "address", "label": "Suspect wallet (origin)", "chain": "ethereum", "riskLevel": "High", "riskScore": 77 },
+  "X021": { "tag": 702, "role": "co_mingled", "kind": "address", "label": "Co-mingled wallet", "chain": "ethereum", "riskLevel": "High", "riskScore": 85 },
+  "X022": { "tag": 703, "role": "unknown", "kind": "address", "label": "Mixed output 1", "chain": "ethereum", "riskLevel": "Unrated", "riskScore": 0 },
+  "X023": { "tag": 704, "role": "unknown", "kind": "address", "label": "Mixed output 2", "chain": "ethereum", "riskLevel": "Unrated", "riskScore": 0 },
+  "X024": { "tag": 705, "role": "unknown", "kind": "address", "label": "Mixed output 3", "chain": "ethereum", "riskLevel": "Unrated", "riskScore": 0 },
+
+  "X030": { "tag": 801, "role": "scam", "kind": "address", "label": "Suspect wallet (origin)", "chain": "ethereum", "riskLevel": "Medium", "riskScore": 51 },
+  "X031": { "tag": 802, "role": "unknown", "kind": "address", "label": "Counterparty", "chain": "ethereum", "riskLevel": "Unrated", "riskScore": 0 },
+  "X032": { "tag": 803, "role": "change", "kind": "address", "label": "Change back to origin", "chain": "ethereum", "riskLevel": "Unrated", "riskScore": 0 },
+  "X033": { "tag": 804, "role": "fee_sink", "kind": "address", "label": "Validator (fee)", "chain": "ethereum", "riskLevel": "Unrated", "riskScore": 0 },
+  "X034": { "tag": 805, "role": "contract", "kind": "address", "label": "Contract touched", "chain": "ethereum", "riskLevel": "Low", "riskScore": 18 },
+
+  "X040": { "tag": 901, "role": "scam", "kind": "address", "label": "Wallet spending an input", "chain": "bitcoin", "riskLevel": "Unrated", "riskScore": 0 },
+  "X041": { "tag": 902, "role": "unknown", "kind": "address", "label": "Output 1", "chain": "bitcoin", "riskLevel": "Unrated", "riskScore": 0 },
+  "X042": { "tag": 903, "role": "unknown", "kind": "address", "label": "Output 2", "chain": "bitcoin", "riskLevel": "Unrated", "riskScore": 0 }
+}

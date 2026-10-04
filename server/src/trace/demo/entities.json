@@ -1,0 +1,24 @@
+[
+  {
+    "id": "E001",
+    "type": "exchange",
+    "name": "Simulated Exchange",
+    "riskLevel": "High",
+    "riskScore": 74,
+    "indicators": [
+      "High-risk service exposure",
+      "Known to receive funds from scam-linked wallets"
+    ]
+  },
+  {
+    "id": "E002",
+    "type": "bridge",
+    "name": "Simulated Bridge",
+    "riskLevel": "Medium",
+    "riskScore": 48,
+    "indicators": [
+      "Cross-ledger movement breaks the chain of custody",
+      "Destination address is not observable from the source chain"
+    ]
+  }
+]

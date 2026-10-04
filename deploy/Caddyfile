@@ -1,0 +1,60 @@
+# Caddy reverse proxy — TLS termination and security headers for CryptoTrace AI.
+#
+# Caddy is the low-maintenance option: it obtains and renews certificates from
+# Let's Encrypt on its own, redirects HTTP to HTTPS, and re-checks them before
+# expiry. There is no cron job and no certbot. If you would rather manage
+# certificates yourself, use deploy/nginx.conf instead.
+#
+# Requires DOMAIN (a real hostname resolving to this host) and ACME_EMAIL (for
+# Let's Encrypt expiry notices). Setting ACME_EMAIL=internal switches to Caddy's
+# built-in local CA, which is how the offline verification in the README works.
+
+{$DOMAIN} {
+	# Certificate issuance. `internal` (a valid Caddy issuer name) swaps
+	# Let's Encrypt for a locally-trusted CA — useful for staging, and for
+	# proving the config works without touching a public domain.
+	tls {$ACME_EMAIL:admin@example.com}
+
+	# The app already sets its own security headers via helmet, but CSP and
+	# HSTS are the proxy's job: index.ts deliberately disables helmet's CSP
+	# because the static host is expected to own it, and that host is here.
+	header {
+		# One year, with subdomains and preload. Safe to set this high only
+		# once HTTPS is genuinely working everywhere — browsers will refuse to
+		# let a user back out of preload.
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+		# No inline scripts, no <style> tags, no iframes, no external fonts or
+		# images anywhere in the built SPA, so 'self' is genuinely sufficient.
+		# Verified against web/dist rather than assumed.
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; frame-src 'none'"
+
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		Permissions-Policy "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+
+		# Do not advertise the Caddy version.
+		-Server
+	}
+
+	encode zstd gzip
+
+	# The app serves both /api and the SPA, so everything proxies to one
+	# upstream and same-origin /api calls keep working unchanged.
+	reverse_proxy app:8080 {
+		# The tracer accepts a 120s budget, so a trace can legitimately hold
+		# the connection open long past a 60s default proxy timeout. This
+		# block has to live inside reverse_proxy; as a sibling it is not a
+		# recognised directive and Caddy refuses to start.
+		transport http {
+			read_timeout 150s
+			write_timeout 150s
+		}
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
